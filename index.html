@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>مساعد التداول والتدوير الذكي</title>
+
+<!-- استدعاء خط Cairo لمنح الواجهة مظهرًا فخمًا وأنيقًا -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --bg-main: #0b0f19;
+        --bg-gradient: radial-gradient(circle at 50% 50%, #1e2640 0%, #0b0f19 100%);
+        --bg-card: rgba(30, 41, 59, 0.7);
+        --bg-input: rgba(15, 23, 42, 0.6);
+        --primary: #10b981;
+        --primary-hover: #059669;
+        --primary-glow: rgba(16, 185, 129, 0.2);
+        --accent: #38bdf8;
+        --accent-glow: rgba(56, 189, 248, 0.25);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-main);
+        background: var(--bg-gradient);
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .box {
+        background: var(--bg-card);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        padding: 35px;
+        border-radius: 24px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border);
+    }
+
+    h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 30px;
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13.5px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 14px;
+        font-size: 16px;
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px 44px 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 600;
+        background: var(--bg-input);
+        color: #fff;
+        outline: none;
+        box-sizing: border-box;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: inherit;
+    }
+
+    input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-glow);
+        background: rgba(15, 23, 42, 0.8);
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    button {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--primary) 0%, #059669 100%);
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        box-shadow: 0 4px 12px var(--primary-glow);
+        font-family: inherit;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+
+    .result {
+        margin-top: 30px;
+        display: none;
+        animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-res {
+        background: rgba(15, 23, 42, 0.5);
+        padding: 18px;
+        border-radius: 16px;
+        margin-bottom: 14px;
+        border-right: 5px solid var(--primary);
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        line-height: 1.8;
+        font-size: 14.5px;
+    }
+
+    .card-res.suggestion {
+        border-right-color: var(--accent);
+        background: rgba(56, 189, 248, 0.03);
+    }
+
+    .card-res.avg-card {
+        border-right-color: #a855f7;
+        background: rgba(168, 85, 247, 0.03);
+    }
+
+    .card-res.signal-card {
+        border-right-color: #f43f5e;
+        background: rgba(244, 63, 94, 0.03);
+    }
+
+    .val {
+        font-weight: 700;
+        color: #34d399;
+        font-size: 17px;
+    }
+
+    .price-target {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 17px;
+    }
+
+    .text-title {
+        font-weight: 700;
+        color: #fff;
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+    <h2>مساعد التداول الذكي</h2>
+
+    <div class="input-group">
+        <label for="buyPrice">سعر الشراء الأصلي</label>
+        <div class="input-wrapper">
+            <span class="input-icon">💵</span>
+            <input type="number" id="buyPrice" step="any" placeholder="مثال: 5">
+        </div>
+    </div>
+    
+    <div class="input-group">
+        <label for="shares">كمية الأسهم الحالية</label>
+        <div class="input-wrapper">
+            <span class="input-icon">📊</span>
+            <input type="number" id="shares" placeholder="مثال: 1000">
+        </div>
+    </div>
+    
+    <div class="input-group">
+        <label for="currentPrice">السعر الحالي المرتفع (جني الربح)</label>
+        <div class="input-wrapper">
+            <span class="input-icon">📈</span>
+            <input type="number" id="currentPrice" step="any" placeholder="مثال: 5.2">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="targetPrice">سعر الشراء المستهدف للدخول الثاني</label>
+        <div class="input-wrapper">
+            <span class="input-icon">🎯</span>
+            <input type="number" id="targetPrice" step="any" placeholder="مثال: 4.90">
+        </div>
+    </div>
+
+    <button onclick="calculateAllSmart()">
+        تحليل الصفقة وتقييم المخاطر ⚡
+    </button>
+
+    <div class="result" id="result"></div>
+
+</div>
+
+<script>
+function calculateAllSmart() {
+    let buyPrice = parseFloat(document.getElementById("buyPrice").value);
+    let shares = parseFloat(document.getElementById("shares").value);
+    let currentPrice = parseFloat(document.getElementById("currentPrice").value);
+    let targetPrice = parseFloat(document.getElementById("targetPrice").value);
+
+    if (isNaN(buyPrice) || isNaN(shares) || isNaN(currentPrice) || isNaN(targetPrice) || shares <= 0) {
+        alert("الرجاء إدخال قيم صحيحة");
+        return;
+    }
+
+    let totalCost = buyPrice * shares;
+    let currentValue = currentPrice * shares;
+    let profit = currentValue - totalCost;
+
+    let resultDiv = document.getElementById("result");
+    resultDiv.style.display = "block";
+    resultDiv.style.animation = 'none';
+    resultDiv.offsetHeight; 
+    resultDiv.style.animation = null;
+
+    if (profit <= 0) {
+        resultDiv.innerHTML = `<div class="card-res signal-card"><span class="text-title">⚠️ تنبيه المحفظة:</span><br>السعر الحالي ليس أعلى من سعر الشراء الأول. لا توجد أرباح لتسييلها وتدويرها حالياً.</div>`;
+        return;
+    }
+
+    if (targetPrice >= currentPrice) {
+        resultDiv.innerHTML = `<div class="card-res signal-card"><span class="text-title">⚠️ خطأ استراتيجي:</span><br>سعر الشراء التالي يجب أن يكون أقل من السعر الحالي المرتفع لتتمكن من استغلال التراجع.</div>`;
+        return;
+    }
+
+    // حسابات المحفظة الدقيقة جداً والمحدثة من الناحية الرياضية اللفظية
+    let sharesToSell = Math.ceil(profit / currentPrice); 
+    let retainedShares = shares - sharesToSell; 
+    let retainedValue = retainedShares * buyPrice; 
+    
+    let newSharesBought = Math.floor(profit / targetPrice); 
+    
+    // حساب الصافي المجاني الحقيقي الناتج عن فرق السعر
+    let netFreeSharesGained = newSharesBought - sharesToSell; 
+
+    let totalSharesNew = retainedShares + newSharesBought;
+    let totalCostNew = retainedValue + (newSharesBought * targetPrice);
+    let newAverageCost = totalCostNew / totalSharesNew;
+
+    let dropPercent = ((currentPrice - targetPrice) / currentPrice) * 100;
+    
+    let safetySignal = "";
+    let signalColor = "";
+
+    if (targetPrice < buyPrice) {
+        safetySignal = "🟢 <b>أمان عالٍ جداً (قاع آمن):</b> أنت تشتري بسعر أقل من تكلفتك الأولى، وهذا يضغط متوسط التكلفة لأسفل بقوة ويكسبك أسهم إضافية مجانية.";
+        signalColor = "#10b981";
+    } else if (targetPrice == buyPrice) {
+        safetySignal = "🔵 <b>تدوير مثالي (إعادة اختبار):</b> أنت تشتري عند نقطة انطلاقك الأولى تماماً، تحمي رأس مالك وتزيد كميتك دون تغيير متوسط التكلفة بشكل مؤثر.";
+        signalColor = "#38bdf8";
+    } else {
+        safetySignal = "🟡 <b>منطقة تذبذب (مخاطرة متوسطة):</b> السعر المستهدف أعلى من شراك الأول. تأكد من وجود دعم قوي على الشارت عند هذا السعر لتجنب التسييل المؤقت.";
+        signalColor = "#f59e0b";
+    }
+
+    resultDiv.innerHTML = `
+        <div class="card-res">
+            <span class="text-title">💰 1. خطوة جني الربح:</span><br>
+            • الربح الصافي المتوفر: <b>${profit.toFixed(2)} ريال</b><br>
+            • بع الآن: <span class="val">${sharesToSell} سهم</span> عند السعر الحالي (${currentPrice}) لتأمين الكاش.
+        </div>
+
+        <div class="card-res suggestion">
+            <span class="text-title">🔄 2. التدوير والكمية المستهدفة:</span><br>
+            • عند السعر المستهدف (${targetPrice.toFixed(2)}) ستشتري بالأرباح: <span class="price-target">${newSharesBought} سهم</span> جديد.<br>
+            • نسبة الخصم المحققة من القمة: <span class="price-target">${dropPercent.toFixed(1)}% -</span><br>
+            • 🎉 <b>الصافي المجاني الفعلي:</b> كسبت <span class="val" style="color:#38bdf8;">${netFreeSharesGained} سهم زيادة مجانية</span> فوق كميتك الأصلية بفضل فارق السعر!
+        </div>
+
+        <div class="card-res" style="border-right-color: ${signalColor}; background: ${signalColor}05;">
+            <span class="text-title">🛡️ 3. مؤشر الأمان الفني:</span><br>
+            • ${safetySignal}
+        </div>
+
+        <div class="card-res avg-card">
+            <span class="text-title">🎯 4. الوضع النهائي للمحفظة:</span><br>
+            • إجمالي الأسهم الجديد: <span class="val" style="color:#c084fc;">${totalSharesNew} سهم</span>.<br>
+            • متوسط سعر التكلفة المعدل: <span class="val" style="color:#c084fc;">${newAverageCost.toFixed(4)} ريال</span>.
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>
+
